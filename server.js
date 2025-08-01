@@ -5,8 +5,9 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const authRoutes = require('./routes/auth.js'); 
-const taskRoutes = require('./routes/taskRoutes.js');
+const authRoutes = require('./routes/authRoutes.js'); 
+const skillRoutes = require('./routes/skillRoutes.js')
+const roadmapRoutes = require('./routes/roadmapRoutes.js')
 
 dotenv.config();
 const app = express();
@@ -20,7 +21,8 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use('/api/auth', authRoutes);
-app.use('/api/task', taskRoutes);
+app.use('/api/skill', skillRoutes);
+app.use('/api/roadmap', roadmapRoutes);
 
 // Routes placeholder
 app.get('/', (req,res) => {

@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require('dotenv').config();
 
+// SIGNUP / REGISTER
 const register = async (req, res) => {
   const { name, email, password} = req.body;
   try {
@@ -24,6 +25,7 @@ const register = async (req, res) => {
   }
 };
 
+// LOGIN
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -36,7 +38,7 @@ const login = async (req, res) => {
     if (!match) return res.status(400).json({ msg: "Wrong Password" });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
+      expiresIn: "3h",
     });
 
     console.log('Login Successful ');
@@ -46,7 +48,7 @@ const login = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // use HTTPS in production
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 3 * 60 * 60 * 1000, // 3 hour
     });
 
     // send success response
@@ -65,6 +67,21 @@ const login = async (req, res) => {
   }
 };
 
+// LOG-OUT
+// authController.js
+const logout = (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    expires: new Date(0), // Expire now
+  });
+
+  res.status(200).json({ message: "Logged out successfully" });
+};
+
+
+// GET CURRENT USER
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -76,4 +93,4 @@ const getMe = async (req, res) => {
 };
 
 
-module.exports = {register, login, getMe};
+module.exports = {register, login, logout, getMe};
