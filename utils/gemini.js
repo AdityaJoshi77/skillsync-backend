@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const { GoogleGenerativeAI } = require("@google/generative-ai"); // ✅ This is key
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -52,13 +52,17 @@ Example Output:
 
   try {
     console.log("Gemini API Key:", process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-flash-latest" });
-    
+    const model = genAI.getGenerativeModel({
+      model: "models/gemini-1.5-flash-latest",
+    });
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text();
 
-    const roadMap = JSON.parse(text);
+    // Clean up any markdown code fences from the Gemini response
+    const cleaned = text.replace(/```json|```/g, "").trim();
+
+    const roadMap = JSON.parse(cleaned);
     console.log("Gemini Roadmap:", roadMap);
     return roadMap;
   } catch (error) {

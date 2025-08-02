@@ -14,7 +14,7 @@ const generateRoadmap_gemini = async (req, res) => {
     console.log('In generateRoadmap_gemini');
     // Call Gemini to generate the modules
     const modules = await generateRoadmapFromGemini(title);
-    
+    console.log(modules);
     // Respond with preview
     return res.status(200).json({
       roadmap: {
@@ -22,6 +22,7 @@ const generateRoadmap_gemini = async (req, res) => {
         modules,
       },
     });
+
   } catch (err) {
     console.error("Error generating roadmap from Gemini:", err.message);
     return res.status(500).json({
