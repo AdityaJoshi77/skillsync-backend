@@ -1,24 +1,35 @@
 const Skill = require("../models/SkillModel"); // renamed model
+const geminiValidateSkillTitle = require('../utils/geminiSkillTitleValidator');
 
-// POST : CREATE SKILL (equivalent to creating a Task)
 const createSkill = async (req, res) => {
   try {
     const { title } = req.body;
     const userId = req.user._id;
+
     if (!title) {
       return res.status(400).json({ message: "Skill title is required" });
     }
 
-    const existing = await Skill.findOne({ title });
+    // Validate title using Gemini
+    const validity = await geminiValidateSkillTitle(title);
+    if (validity === "INVALID") {
+      return res
+        .status(400)
+        .json({ message: "Enter a valid tech-related skill title." });
+    }
+
+    // Check if skill already exists
+    const existing = await Skill.findOne({ title, user: userId });
     if (existing) {
       console.log(`${title} already exists`);
       return res.status(400).json({ message: `${title} already exists` });
     }
 
+    // Create skill
     const skill = new Skill({
       user: userId,
       title,
-      modules: [], // No modules yet, only title
+      modules: [], // No modules yet
     });
 
     await skill.save();

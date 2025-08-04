@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 // Submodule schema: atomic units like "Learn Flexbox"
-const taskSchema = new mongoose.Schema({
+const subModuleSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -25,7 +25,7 @@ const moduleSchema = new mongoose.Schema({
     required: true,
   },
   submodules: {
-    type: [taskSchema],
+    type: [subModuleSchema],
     required: true,
   },
   status: {
