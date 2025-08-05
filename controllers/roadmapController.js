@@ -99,8 +99,8 @@ const acceptRoadmap = async (req, res) => {
         console.log('Skill object is not an array');
     
     populateSkillMetaData(skill);
-    // console.log('Total Submodules in the skill : ', skill.totalSubmodules);
-    // console.log('Submodules in each module', skill.modules.map((mod)=>mod.totalSubmodules));
+    console.log('Skill Progress : ', skill.progress);
+    console.log('Module Progress : ', skill.modules.map((mod)=>mod.progress));
     await skill.save();
     console.log("Skill roadmap updated", skill);
     res.status(200).json({ message: "Skill roadmap updated", skill });

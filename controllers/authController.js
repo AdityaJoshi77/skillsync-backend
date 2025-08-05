@@ -1,24 +1,22 @@
 const User = require("../models/User.js");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-require('dotenv').config();
+require("dotenv").config();
 
 // SIGNUP / REGISTER
 const register = async (req, res) => {
-  const { name, email, password} = req.body;
+  const { name, email, password } = req.body;
   try {
-    const existing = await User.find({ email });
+    console.log(req.body);
+    const existing = await User.findOne({ email });
+    console.log("The existing User : ", existing);
     if (existing) return res.status(400).json({ msg: "User already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed});
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const user = await User.create({ name, email, password: hashed, skillMetaData: [] });
 
     console.log("Registration successful : ", user);
-    res.status(201).json({ token, user: { id: user._id, name, email} });
+    res.status(201).json({ user: { id: user._id, name, email } });
   } catch (err) {
     console.log(err);
     res.status(500).json({ msg: "Registration Failed" });
@@ -30,7 +28,7 @@ const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     console.log(req.body);
-    console.log('Attempting login...');
+    console.log("Attempting login...");
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ msg: "Email Not Found mannnn" });
 
@@ -41,7 +39,7 @@ const login = async (req, res) => {
       expiresIn: "3h",
     });
 
-    console.log('Login Successful ');
+    console.log("Login Successful ");
 
     // Set JWT as HTTP-only cookie
     res.cookie("token", token, {
@@ -53,17 +51,15 @@ const login = async (req, res) => {
 
     // send success response
     res.status(200).json({
-      message: 'Login Successful',
-      user: { id: user._id, name: user.name, email},
+      message: "Login Successful",
+      user: { id: user._id, name: user.name, email },
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json(
-      { 
-        msg: "Login Failed",
-        error: `${error.message}`
-      }
-    );
+    res.status(500).json({
+      msg: "Login Failed",
+      error: `${error.message}`,
+    });
   }
 };
 
@@ -80,7 +76,6 @@ const logout = (req, res) => {
   res.status(200).json({ message: "Logged out successfully" });
 };
 
-
 // GET CURRENT USER
 const getMe = async (req, res) => {
   try {
@@ -92,5 +87,4 @@ const getMe = async (req, res) => {
   }
 };
 
-
-module.exports = {register, login, logout, getMe};
+module.exports = { register, login, logout, getMe };

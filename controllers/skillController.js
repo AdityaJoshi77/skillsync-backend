@@ -1,4 +1,5 @@
-const Skill = require("../models/SkillModel"); // renamed model
+const Skill = require("../models/SkillModel"); 
+const User = require('../models/User') 
 const geminiValidateSkillTitle = require('../geminiAPI/geminiSkillTitleValidator')
 
 const createSkill = async (req, res) => {
@@ -40,6 +41,17 @@ const createSkill = async (req, res) => {
 
     console.log('Skill saved as blank card');
     await skill.save();
+
+     // update user
+    const user = await User.findById(userId);
+    user.skillMetaData.push({
+      skillId: skill._id,
+      skillTitle: skill.title,
+      progress: 0
+    });
+    console.log('User\'s Object after Skill creation : ', user);
+    await user.save();
+    
     res.status(201).json(skill);
   } catch (error) {
     console.error("Error creating skill:", error.message);
