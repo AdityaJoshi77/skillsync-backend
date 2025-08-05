@@ -1,8 +1,9 @@
 require("dotenv").config();
 
 const Skill = require("../models/SkillModel");
-const {geminiGenerateRoadmap, geminiGenerateRoadmapDummy} = require("../utils/geminiRoadmapGenerator");
+const {geminiGenerateRoadmap, geminiGenerateRoadmapDummy} = require("../geminiAPI/geminiRoadmapGenerator");
 const dummyRoadmap = require("../dummyData/dummyRoadmap");
+const populateSkillMetaData = require('../utils/populateSkillMetaData')
 
 const generateRoadmap_gemini = async (req, res) => {
   try {
@@ -48,7 +49,7 @@ const generateRoadmap_dummy = async (req, res) => {
     }
 
     // Dummy roadmap structure based on new schema
-    console.log("Sending Dummy Roadmap : ", dummyRoadmap.modules);
+    console.log("Sending Dummy Roadmap : ", dummyRoadmap);
 
     res.status(200).json({ roadmap: dummyRoadmap });
   } catch (err) {
@@ -91,7 +92,15 @@ const acceptRoadmap = async (req, res) => {
         status: sub.status,
       })),
     }));
-
+    
+    if(Array.isArray(skill))
+        console.log('skill object is an array');
+    else
+        console.log('Skill object is not an array');
+    
+    populateSkillMetaData(skill);
+    // console.log('Total Submodules in the skill : ', skill.totalSubmodules);
+    // console.log('Submodules in each module', skill.modules.map((mod)=>mod.totalSubmodules));
     await skill.save();
     console.log("Skill roadmap updated", skill);
     res.status(200).json({ message: "Skill roadmap updated", skill });

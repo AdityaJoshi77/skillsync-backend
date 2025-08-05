@@ -1,21 +1,27 @@
 const Skill = require("../models/SkillModel"); // renamed model
-const geminiValidateSkillTitle = require('../utils/geminiSkillTitleValidator');
+const geminiValidateSkillTitle = require('../geminiAPI/geminiSkillTitleValidator')
 
 const createSkill = async (req, res) => {
   try {
-    const { title } = req.body;
+    const { title, useAI } = req.body;
     const userId = req.user._id;
+
+    console.log('Request Body in createSkill : ', req.body);
 
     if (!title) {
       return res.status(400).json({ message: "Skill title is required" });
     }
 
     // Validate title using Gemini
-    const validity = await geminiValidateSkillTitle(title);
-    if (validity === "INVALID") {
-      return res
-        .status(400)
-        .json({ message: "Enter a valid tech-related skill title." });
+    if (useAI) {
+      const validity = await geminiValidateSkillTitle(title);
+      if (validity === "INVALID") {
+        return res
+          .status(400)
+          .json({
+            message: `${title} is not Tech Relevant, enter a valid tech-related skill title.`,
+          });
+      }
     }
 
     // Check if skill already exists
@@ -32,6 +38,7 @@ const createSkill = async (req, res) => {
       modules: [], // No modules yet
     });
 
+    console.log('Skill saved as blank card');
     await skill.save();
     res.status(201).json(skill);
   } catch (error) {

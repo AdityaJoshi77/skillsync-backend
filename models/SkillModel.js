@@ -33,6 +33,18 @@ const moduleSchema = new mongoose.Schema({
     enum: ["Pending", "In Progress", "Completed"],
     default: "Pending",
   },
+  totalSubmodules: {
+    type: Number,
+    default: 0,
+  },
+  completedSubModules: {
+    type: Number,
+    default: 0,
+  },
+  progress: {
+    type: Number,
+    default: 0,
+  },
 });
 
 // Skill schema: the entire learning goal, e.g., "Learn Web Development"
@@ -50,6 +62,18 @@ const skillSchema = new mongoose.Schema(
     modules: {
       type: [moduleSchema],
       required: true,
+    },
+    totalSubmodules: {
+      type: Number,
+      default: 0,
+    },
+    completedSubModules: {
+      type: Number,
+      default: 0,
+    },
+    progress: {
+      type: Number,
+      default: 0,
     },
   },
   {
