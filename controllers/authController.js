@@ -30,7 +30,7 @@ const login = async (req, res) => {
     console.log(req.body);
     console.log("Attempting login...");
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ msg: "Email Not Found mannnn" });
+    if (!user) return res.status(400).json({ msg: "User Not Found" });
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ msg: "Wrong Password" });
@@ -52,7 +52,7 @@ const login = async (req, res) => {
     // send success response
     res.status(200).json({
       message: "Login Successful",
-      user: { id: user._id, name: user.name, email },
+      user: { id: user._id, name: user.name, email, skillMetaData: user.skillMetaData },
     });
   } catch (error) {
     console.log(error);

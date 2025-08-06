@@ -3,7 +3,8 @@ require("dotenv").config();
 const Skill = require("../models/SkillModel");
 const {geminiGenerateRoadmap, geminiGenerateRoadmapDummy} = require("../geminiAPI/geminiRoadmapGenerator");
 const dummyRoadmap = require("../dummyData/dummyRoadmap");
-const populateSkillMetaData = require('../utils/populateSkillMetaData')
+const populateSkillMetaData = require('../utils/populateSkillMetaData');
+const User = require("../models/User");
 
 const generateRoadmap_gemini = async (req, res) => {
   try {
@@ -97,8 +98,12 @@ const acceptRoadmap = async (req, res) => {
         console.log('skill object is an array');
     else
         console.log('Skill object is not an array');
-    
-    populateSkillMetaData(skill);
+
+    // FOR DEV PURPOSE: 
+    const user = await User.findById(userId);    
+    populateSkillMetaData(skill, user);
+
+
     console.log('Skill Progress : ', skill.progress);
     console.log('Module Progress : ', skill.modules.map((mod)=>mod.progress));
     await skill.save();

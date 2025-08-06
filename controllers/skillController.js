@@ -1,13 +1,13 @@
-const Skill = require("../models/SkillModel"); 
-const User = require('../models/User') 
-const geminiValidateSkillTitle = require('../geminiAPI/geminiSkillTitleValidator')
+const Skill = require("../models/SkillModel");
+const User = require("../models/User");
+const geminiValidateSkillTitle = require("../geminiAPI/geminiSkillTitleValidator");
 
 const createSkill = async (req, res) => {
   try {
     const { title, useAI } = req.body;
     const userId = req.user._id;
 
-    console.log('Request Body in createSkill : ', req.body);
+    console.log("Request Body in createSkill : ", req.body);
 
     if (!title) {
       return res.status(400).json({ message: "Skill title is required" });
@@ -17,11 +17,9 @@ const createSkill = async (req, res) => {
     if (useAI) {
       const validity = await geminiValidateSkillTitle(title);
       if (validity === "INVALID") {
-        return res
-          .status(400)
-          .json({
-            message: `${title} is not Tech Relevant, enter a valid tech-related skill title.`,
-          });
+        return res.status(400).json({
+          message: `${title} is not Tech Relevant, enter a valid tech-related skill title.`,
+        });
       }
     }
 
@@ -39,19 +37,20 @@ const createSkill = async (req, res) => {
       modules: [], // No modules yet
     });
 
-    console.log('Skill saved as blank card');
-    await skill.save();
-
-     // update user
+    // update user's skill MetaData
     const user = await User.findById(userId);
     user.skillMetaData.push({
       skillId: skill._id,
-      skillTitle: skill.title,
-      progress: 0
+      title: skill.title,
+      progress: 0,
     });
-    console.log('User\'s Object after Skill creation : ', user);
+
+    console.log('Skill saved as blank card');
+    await skill.save();
+
+    console.log("User's Object after Skill creation : ", user);
     await user.save();
-    
+
     res.status(201).json(skill);
   } catch (error) {
     console.error("Error creating skill:", error.message);
@@ -89,8 +88,21 @@ const deleteSkill = async (req, res) => {
         .status(404)
         .json({ message: "Skill not found or user unauthorized" });
     }
+    
 
+    // Remove the deleted skill's metadata from the current user's skillMetaData.
+    const user = await User.findById(userId);
+    
+    user.skillMetaData = user.skillMetaData.filter(
+      (skill) => skill.skillId.toString() !== skillId
+    );
+
+    // make the new changes persist.
+    await user.save();
     await skill.deleteOne();
+
+    console.log("User's skillMetaData after Skill Deletion", user.skillMetaData);
+    console.log(`Id of ${skill.title} : `, skillId);
 
     res.status(200).json({ message: "Skill deleted successfully" });
   } catch (error) {
