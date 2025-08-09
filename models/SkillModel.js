@@ -1,16 +1,52 @@
 const mongoose = require("mongoose");
 
+
+// notes schema: a note made for a submodule
+const notesSchema = new mongoose.Schema({
+  title:{
+    type:String,
+    required:true
+  },
+
+  content:{
+    type:String,
+    default: "",
+  }
+})
+
 // Submodule schema: atomic units like "Learn Flexbox"
 const subModuleSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
   },
+
   type: {
     type: String,
     enum: ["Learning", "Practice", "Project"],
     required: true,
   },
+
+  content: {
+    youtubeLinks:{
+      type: [String],
+      default: [],
+    },
+    articleLinks:{
+      type:[String],
+      default: [],
+    },
+    aiSummary: {
+      type: String,
+      default: "",
+    }
+  },
+
+  notes:{
+    type:[notesSchema],
+    default:[]
+  },
+
   status: {
     type: String,
     enum: ["Pending", "Completed"],
@@ -50,7 +86,7 @@ const moduleSchema = new mongoose.Schema({
 // Skill schema: the entire learning goal, e.g., "Learn Web Development"
 const skillSchema = new mongoose.Schema(
   {
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,

@@ -10,6 +10,7 @@ const populateSkillMetaData = (skill, user) => {
     0
   );
 
+  // count the total number of completed Submodules in the skill as a whole
   const completedSubModules_in_skill = skill.modules.reduce(
     (completedSubModules_in_skill, module) => {
       return completedSubModules_in_skill + module.submodules.reduce(
@@ -43,6 +44,7 @@ const populateSkillMetaData = (skill, user) => {
       return (sub.status === "Completed") ? complete + 1 : complete;
     }, 0);
 
+    module.completedSubModules = completedSubModules;
     module.progress = module.totalSubmodules > 0
       ? Math.floor((completedSubModules / module.totalSubmodules) * 100)
       : 0;

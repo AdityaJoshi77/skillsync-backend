@@ -51,7 +51,6 @@ const generateRoadmap_dummy = async (req, res) => {
 
     // Dummy roadmap structure based on new schema
     console.log("Sending Dummy Roadmap : ", dummyRoadmap);
-
     res.status(200).json({ roadmap: dummyRoadmap });
   } catch (err) {
     console.error("Error generating roadmap:", err);
@@ -64,6 +63,8 @@ const acceptRoadmap = async (req, res) => {
   try {
     const { skillId, roadmap } = req.body;
     const userId = req.user._id;
+
+    console.log('In acceptRoadmap Controller');
 
     if (
       !skillId ||
@@ -78,7 +79,7 @@ const acceptRoadmap = async (req, res) => {
     }
 
     // Find the existing skill
-    const skill = await Skill.findOne({ _id: skillId, user: userId });
+    const skill = await Skill.findOne({ _id: skillId, userId });
     if (!skill) {
       return res.status(404).json({ message: "Skill not found" });
     }
@@ -103,10 +104,13 @@ const acceptRoadmap = async (req, res) => {
     const user = await User.findById(userId);    
     populateSkillMetaData(skill, user);
 
-
+    await skill.save();
     console.log('Skill Progress : ', skill.progress);
     console.log('Module Progress : ', skill.modules.map((mod)=>mod.progress));
-    await skill.save();
+
+    await user.save();
+    console.log('New Skill in User\'s SkillMetaData : ', user.skillMetaData[user.skillMetaData.length - 1]);
+
     console.log("Skill roadmap updated", skill);
     res.status(200).json({ message: "Skill roadmap updated", skill });
   } catch (err) {
