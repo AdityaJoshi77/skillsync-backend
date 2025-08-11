@@ -1,6 +1,6 @@
 // middleware/authMiddleware.js
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // adjust the path if needed
+const User = require('../models/UserModel'); // adjust the path if needed
 require('dotenv').config();
 
 
@@ -13,7 +13,7 @@ const protect = async (req, res, next) => {
     } 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(decoded.id).select("-password");
-    console.log('Protect Middleware hit');
+    // console.log('Protect Middleware hit');
 
     next();
   } catch (error) {

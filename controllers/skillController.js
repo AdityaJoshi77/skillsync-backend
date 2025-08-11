@@ -1,5 +1,5 @@
 const Skill = require("../models/SkillModel");
-const User = require("../models/User");
+const User = require("../models/UserModel");
 const geminiValidateSkillTitle = require("../geminiAPI/geminiSkillTitleValidator");
 
 const createSkill = async (req, res) => {
@@ -80,22 +80,58 @@ const getUserSkills = async (req, res) => {
 const getUserSkillById = async (req, res) => {
   try {
     const { skillId } = req.params;
+    const { populateContent } = req.query;
 
-    if (!skillId)
+    if (!skillId) {
       return res
         .status(400)
         .json({ message: "Cannot get Skill. Missing skillId" });
+    }
 
-    const skill = await Skill.findById(skillId);
-    if (!skill)
+    // Fetch the skill without population to validate ownership
+    const skillDoc = await Skill.findById(skillId).select("userId").lean();
+    if (!skillDoc) {
       return res
         .status(404)
         .json({ message: "Skill Not Found, Invalid SkillId" });
+    }
 
-    if (skill.userId.toString() !== req.user._id.toString())
+    if (skillDoc.userId.toString() !== req.user._id.toString()) {
       return res
         .status(404)
         .json({ message: "Skill not found; Invalid userId" });
+    }
+
+    // Now build query for the full skill
+    let skillQuery = Skill.findById(skillId);
+
+    if (populateContent) {
+      skillQuery = skillQuery.populate({
+        path: "modules.submodules.contentId", // real schema field
+        model: "Content", // population creates a new field in the object, not in document
+        populate: [
+          { path: "articles", model: "Article" },
+          { path: "notes", model: "Note" },
+        ],
+      });
+    }
+
+    const skill = await skillQuery.lean();
+    if (!skill) {
+      return res
+        .status(404)
+        .json({ message: "Skill Not Found, Invalid SkillId" });
+    }
+
+    // Duplicate populated contentId into content key
+    if (populateContent) {
+      skill.modules.forEach((module) => {
+        module.submodules.forEach((sub) => {
+          sub.content = sub.contentId; // new key with populated object
+          sub.contentId = sub.contentId._id; // only keep the contentId in the contentId field.
+        });
+      });
+    }
 
     res.status(200).json(skill);
   } catch (error) {
@@ -111,7 +147,7 @@ const updateSkillProgress = async (req, res) => {
     const { moduleId, subModuleId, updation } = req.body;
     const userId = req.user._id;
 
-    console.log('In updateSkillProgress() ');
+    console.log("In updateSkillProgress() ");
 
     const skill = await Skill.findById(skillId);
     if (!skill)

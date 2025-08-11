@@ -1,10 +1,15 @@
 require("dotenv").config();
+const mongoose = require("mongoose");
 
 const Skill = require("../models/SkillModel");
-const {geminiGenerateRoadmap, geminiGenerateRoadmapDummy} = require("../geminiAPI/geminiRoadmapGenerator");
+const { Content, Article, Note } = require("../models/ContentModel");
+const {
+  geminiGenerateRoadmap,
+  geminiGenerateRoadmapDummy,
+} = require("../geminiAPI/geminiRoadmapGenerator");
 const dummyRoadmap = require("../dummyData/dummyRoadmap");
-const populateSkillMetaData = require('../utils/populateSkillMetaData');
-const User = require("../models/User");
+const populateSkillMetaData = require("../utils/populateSkillMetaData");
+const User = require("../models/UserModel");
 
 const generateRoadmap_gemini = async (req, res) => {
   try {
@@ -64,7 +69,7 @@ const acceptRoadmap = async (req, res) => {
     const { skillId, roadmap } = req.body;
     const userId = req.user._id;
 
-    console.log('In acceptRoadmap Controller');
+    console.log("In acceptRoadmap Controller");
 
     if (
       !skillId ||
@@ -85,31 +90,54 @@ const acceptRoadmap = async (req, res) => {
     }
 
     // Update modules field based on roadmap
-    skill.modules = roadmap.map((module) => ({
-      title: module.title,
-      status: module.status,
-      submodules: module.submodules.map((sub) => ({
-        title: sub.title,
-        type: sub.type,
-        status: sub.status,
-      })),
-    }));
-    
-    if(Array.isArray(skill))
-        console.log('skill object is an array');
-    else
-        console.log('Skill object is not an array');
+    skill.modules = await Promise.all(
+      roadmap.map(async (module) => {
+        const moduleObjectId = new mongoose.Types.ObjectId();
+        return {
+          _id: moduleObjectId,
+          title: module.title,
+          status: module.status,
+          skillId: skill._id,
+          submodules: await Promise.all(
+            module.submodules.map(async (sub) => {
+              const newContent = await Content.create({
+                youtubeLinks: [],
+                articles: [],
+                notes: [],
+              });
+              return {
+                title: sub.title,
+                type: sub.type,
+                status: sub.status,
+                skillId: skill._id,
+                moduleId: moduleObjectId,
+                contentId: newContent._id,
+              };
+            })
+          ),
+        };
+      })
+    );
 
-    // FOR DEV PURPOSE: 
-    const user = await User.findById(userId);    
+    if (Array.isArray(skill)) console.log("skill object is an array");
+    else console.log("Skill object is not an array");
+
+    // FOR DEV PURPOSE:
+    const user = await User.findById(userId);
     populateSkillMetaData(skill, user);
 
     await skill.save();
-    console.log('Skill Progress : ', skill.progress);
-    console.log('Module Progress : ', skill.modules.map((mod)=>mod.progress));
+    console.log("Skill Progress : ", skill.progress);
+    console.log(
+      "Module Progress : ",
+      skill.modules.map((mod) => mod.progress)
+    );
 
     await user.save();
-    console.log('New Skill in User\'s SkillMetaData : ', user.skillMetaData[user.skillMetaData.length - 1]);
+    // console.log(
+    //   "New Skill in User's SkillMetaData : ",
+    // user.skillMetaData[user.skillMetaData.length - 1]
+    // );
 
     console.log("Skill roadmap updated", skill);
     res.status(200).json({ message: "Skill roadmap updated", skill });

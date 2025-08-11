@@ -4,7 +4,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const geminiValidateSkillTitle = async (title) => {
   const model = genAI.getGenerativeModel({
-    model: "models/gemini-1.5-flash-latest",
+    // model: "models/gemini-1.5-flash-latest",
+    model: "models/gemini-2.5-flash",
   });
 
   const prompt = `

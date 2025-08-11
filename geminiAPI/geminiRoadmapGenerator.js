@@ -5,7 +5,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const geminiGenerateRoadmap = async (skillName) => {
   const model = genAI.getGenerativeModel({
-    model: "models/gemini-1.5-flash-latest",
+    // model: "models/gemini-1.5-flash-latest",
+    model: "models/gemini-2.5-flash",
   });
 
   const generationPrompt = `
@@ -70,7 +71,6 @@ Example Output:
     return [];
   }
 };
-
 
 // DUMMY ROADMAP WITH SOME SUBMODULES COMPLETED
 const geminiGenerateRoadmapDummy = async (skillName) => {
@@ -143,5 +143,4 @@ Example Output:
   }
 };
 
-
-module.exports = {geminiGenerateRoadmap, geminiGenerateRoadmapDummy};
+module.exports = { geminiGenerateRoadmap, geminiGenerateRoadmapDummy };

@@ -1,24 +1,21 @@
+// models/skill.js
 const mongoose = require("mongoose");
 
-
-// notes schema: a note made for a submodule
-const notesSchema = new mongoose.Schema({
-  title:{
-    type:String,
-    required:true
-  },
-
-  content:{
-    type:String,
-    default: "",
-  }
-})
-
-// Submodule schema: atomic units like "Learn Flexbox"
+// Submodule schema: atomic unit like "Learn Flexbox"
 const subModuleSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
+  },
+
+  skillId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Skill",
+  },
+
+  moduleId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Module",
   },
 
   type: {
@@ -27,30 +24,17 @@ const subModuleSchema = new mongoose.Schema({
     required: true,
   },
 
-  content: {
-    youtubeLinks:{
-      type: [String],
-      default: [],
-    },
-    articleLinks:{
-      type:[String],
-      default: [],
-    },
-    aiSummary: {
-      type: String,
-      default: "",
-    }
-  },
-
-  notes:{
-    type:[notesSchema],
-    default:[]
-  },
-
   status: {
     type: String,
     enum: ["Pending", "Completed"],
     default: "Pending",
+  },
+
+  // Reference to the Content model
+  contentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Content",
+    default: null,
   },
 });
 
@@ -60,6 +44,11 @@ const moduleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  skillId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Skill",
+  },
+
   submodules: {
     type: [subModuleSchema],
     required: true,
