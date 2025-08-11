@@ -8,14 +8,29 @@ const subModuleSchema = new mongoose.Schema({
     required: true,
   },
 
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+
   skillId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Skill",
   },
 
+  skillName:{
+    type: String,
+    required: true,
+  },
+
   moduleId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Module",
+  },
+
+  moduleName: {
+    type: String,
+    required: true,
   },
 
   type: {
@@ -44,9 +59,20 @@ const moduleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+
   skillId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Skill",
+  },
+
+  skillName:{
+    type: String,
+    required: true,
   },
 
   submodules: {

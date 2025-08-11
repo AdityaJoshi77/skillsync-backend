@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/authRoutes.js'); 
 const skillRoutes = require('./routes/skillRoutes.js')
 const roadmapRoutes = require('./routes/roadmapRoutes.js')
+const contentRoutes = require('./routes/contentRoutes.js')
 
 dotenv.config();
 const app = express();
@@ -23,6 +24,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/skill', skillRoutes);
 app.use('/api/roadmap', roadmapRoutes);
+app.use('/api/content', contentRoutes);
 
 // Routes placeholder
 app.get('/', (req,res) => {

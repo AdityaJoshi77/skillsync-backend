@@ -98,9 +98,12 @@ const acceptRoadmap = async (req, res) => {
           title: module.title,
           status: module.status,
           skillId: skill._id,
+          skillName: skill.title,
+          userId,
           submodules: await Promise.all(
             module.submodules.map(async (sub) => {
               const newContent = await Content.create({
+                userId,
                 youtubeLinks: [],
                 articles: [],
                 notes: [],
@@ -109,8 +112,11 @@ const acceptRoadmap = async (req, res) => {
                 title: sub.title,
                 type: sub.type,
                 status: sub.status,
+                userId,
                 skillId: skill._id,
+                skillName: skill.title,
                 moduleId: moduleObjectId,
+                moduleName: module.title,
                 contentId: newContent._id,
               };
             })

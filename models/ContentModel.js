@@ -6,6 +6,7 @@ const noteSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     content: { type: String, default: "" },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
@@ -15,6 +16,7 @@ const articleSchema = new mongoose.Schema({
   title: { type: String, required: true },
   link: { type: String, required: true },
   summary: { type: String, default: "" },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 
 // Content schema
@@ -32,6 +34,7 @@ const contentSchema = new mongoose.Schema({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Note" }],
     default: [],
   },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 
 // Export models

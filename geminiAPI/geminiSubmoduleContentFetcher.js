@@ -56,4 +56,46 @@ Rules:
   }
 };
 
-module.exports = {geminiSubmoduleArticleFetcher}
+const geminiSubmoduleVideoFetcher = async (skillName, ModuleName, SubmoduleName) => {
+  const model = genAI.getGenerativeModel({
+    model: "models/gemini-2.5-flash",
+  });
+
+  const generationPrompt = `
+You are a tech research assistant. Your job is to find exactly 3 relevant YouTube videos that match the given technology topic and return only their direct video URLs.
+
+Before finalizing your answer:
+1. Search YouTube's current results for the topic.
+2. Verify each video is available (not removed, private, or restricted).
+3. Ensure each URL is a direct, working YouTube link in the format "https://www.youtube.com/watch?v=VIDEO_ID".
+
+Context:  
+Skill: ${skillName}  
+Module: ${ModuleName}  
+SubModule: ${SubmoduleName}  
+
+Output Rules:  
+- Only return a valid JSON array of exactly 3 strings (the verified YouTube video URLs).  
+- No titles, no summaries, no markdown, no extra text.  
+- Do not include playlists, shorts, or channel links — only standard YouTube video links.  
+- Links must not be shortened or redirected.  
+`;
+
+  try {
+    console.log("🎥 Getting YouTube URLs for:", SubmoduleName);
+    const generationResult = await model.generateContent(generationPrompt);
+    const rawText = generationResult.response.text();
+    console.log("📄 Raw Gemini Output:\n", rawText);
+
+    const cleaned = rawText.replace(/```json|```/g, "").trim();
+    const videoUrls = JSON.parse(cleaned);
+    console.log("✅ Parsed Video URLs:", videoUrls);
+
+    return videoUrls;
+  } catch (error) {
+    console.error("❗ Gemini video fetching failed:", error.message);
+    return [];
+  }
+};
+
+module.exports = {geminiSubmoduleArticleFetcher, geminiSubmoduleVideoFetcher}
