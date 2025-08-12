@@ -1,8 +1,18 @@
 const youtubeLinksDummy = [
-  "https://www.youtube.com/watch?v=HcqpanDadyQ",
-  "https://www.youtube.com/watch?v=Ub5bfiFLbco",
-  "https://www.youtube.com/watch?v=0v93qHDqq_g",
+  {
+    title: "JavaScript Crash Course for Beginners",
+    link: "https://www.youtube.com/watch?v=HcqpanDadyQ"
+  },
+  {
+    title: "Understanding Node.js in 30 Minutes",
+    link: "https://www.youtube.com/watch?v=Ub5bfiFLbco"
+  },
+  {
+    title: "Async JavaScript Explained",
+    link: "https://www.youtube.com/watch?v=0v93qHDqq_g"
+  }
 ];
+
 
 const articlesDummy = [
   {

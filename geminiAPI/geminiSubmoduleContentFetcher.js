@@ -1,8 +1,13 @@
 require("dotenv").config();
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const searchYouTube = require('../youtubeAPI/youtubeSearch');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const geminiSubmoduleArticleFetcher = async (skillName, ModuleName, SubmoduleName) => {
+const geminiSubmoduleArticleFetcher = async (
+  skillName,
+  ModuleName,
+  SubmoduleName
+) => {
   const model = genAI.getGenerativeModel({
     // model: "models/gemini-1.5-flash-latest",
     model: "models/gemini-2.5-flash",
@@ -56,46 +61,49 @@ Rules:
   }
 };
 
-const geminiSubmoduleVideoFetcher = async (skillName, ModuleName, SubmoduleName) => {
+const geminiSubmoduleVideoFetcher = async (
+  skillName,
+  moduleName,
+  submoduleName
+) => {
   const model = genAI.getGenerativeModel({
     model: "models/gemini-2.5-flash",
   });
 
   const generationPrompt = `
-You are a tech research assistant. Your job is to find exactly 3 relevant YouTube videos that match the given technology topic and return only their direct video URLs.
+You are a helpful assistant. Given the following context, generate a concise and effective YouTube search query that would return the most relevant videos for this topic.
 
-Before finalizing your answer:
-1. Search YouTube's current results for the topic.
-2. Verify each video is available (not removed, private, or restricted).
-3. Ensure each URL is a direct, working YouTube link in the format "https://www.youtube.com/watch?v=VIDEO_ID".
+Context:
+Skill: ${skillName}
+Module: ${moduleName}
+SubModule: ${submoduleName}
 
-Context:  
-Skill: ${skillName}  
-Module: ${ModuleName}  
-SubModule: ${SubmoduleName}  
-
-Output Rules:  
-- Only return a valid JSON array of exactly 3 strings (the verified YouTube video URLs).  
-- No titles, no summaries, no markdown, no extra text.  
-- Do not include playlists, shorts, or channel links — only standard YouTube video links.  
-- Links must not be shortened or redirected.  
+Return ONLY a single search query string. No explanations or formatting.
 `;
 
   try {
-    console.log("🎥 Getting YouTube URLs for:", SubmoduleName);
+    console.log("🎥 Generating search query for:", submoduleName);
     const generationResult = await model.generateContent(generationPrompt);
-    const rawText = generationResult.response.text();
-    console.log("📄 Raw Gemini Output:\n", rawText);
+    const query = generationResult.response.text().trim();
+    console.log("🔍 Generated search query:", query);
 
-    const cleaned = rawText.replace(/```json|```/g, "").trim();
-    const videoUrls = JSON.parse(cleaned);
-    console.log("✅ Parsed Video URLs:", videoUrls);
+    const videos = await searchYouTube(query);
 
-    return videoUrls;
+    // Transform to only include title and full YouTube link as "link"
+    const formattedVideos = videos.map((video) => {
+      const videoId = video.id.videoId || (video.id.playlistId ? video.id.playlistId : "");
+      return {
+        title: video.snippet.title,
+        link: videoId ? `https://www.youtube.com/watch?v=${videoId}` : "",
+      };
+    }).filter(v => v.link !== ""); // filter out if no valid videoId
+
+    return formattedVideos;
   } catch (error) {
-    console.error("❗ Gemini video fetching failed:", error.message);
+    console.error("❗ Video fetching failed:", error.message);
     return [];
   }
 };
 
-module.exports = {geminiSubmoduleArticleFetcher, geminiSubmoduleVideoFetcher}
+
+module.exports = { geminiSubmoduleArticleFetcher, geminiSubmoduleVideoFetcher };

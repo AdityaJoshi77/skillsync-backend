@@ -11,6 +11,16 @@ const noteSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// YoutubeLinks schema
+const youtubeLinksSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    link: { type: String, required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  },
+  { timestamps: true }
+);
+
 // Article schema
 const articleSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -21,7 +31,10 @@ const articleSchema = new mongoose.Schema({
 
 // Content schema
 const contentSchema = new mongoose.Schema({
-  youtubeLinks: { type: [String], default: [] },
+  youtubeLinks: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: "YoutubeLink" }],
+    default: [],
+  },
 
   // Array of references to Article documents
   articles: {
@@ -42,4 +55,5 @@ module.exports = {
   Content: mongoose.model("Content", contentSchema),
   Note: mongoose.model("Note", noteSchema),
   Article: mongoose.model("Article", articleSchema),
+  YoutubeLink: mongoose.model("YoutubeLink", youtubeLinksSchema),
 };
