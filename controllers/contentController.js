@@ -1,5 +1,10 @@
 const mongoose = require("mongoose");
-const { Content, Note, Article, YoutubeLink } = require("../models/ContentModel");
+const {
+  Content,
+  Note,
+  Article,
+  YoutubeLink,
+} = require("../models/ContentModel");
 const {
   geminiSubmoduleArticleFetcher,
   geminiSubmoduleVideoFetcher,
@@ -114,6 +119,7 @@ const generateVideos = withTransaction(async (req, res, session) => {
   });
 });
 
+// GET: Content Articles of a Submodule
 const getContentArticles = async (req, res) => {
   try {
     const contentId = req.params.contentId;
@@ -143,6 +149,7 @@ const getContentArticles = async (req, res) => {
   }
 };
 
+// GET: Content Videos of a Submodule
 const getContentVideos = async (req, res) => {
   try {
     const contentId = req.params.contentId;
@@ -172,4 +179,144 @@ const getContentVideos = async (req, res) => {
   }
 };
 
-module.exports = { generateArticles, generateVideos, getContentArticles, getContentVideos };
+// GET: Content Notes for a Submodule:
+const getContentNotes = async (req, res) => {
+  try {
+    const contentId = req.params.contentId;
+
+    const contentDoc = await Content.findById(contentId);
+
+    if (!contentDoc) {
+      return res.status(404).json({
+        message: "Content with given Id not found",
+      });
+    }
+
+    if (contentDoc.userId.toString() !== req.user._id.toString()) {
+      return res.status(401).json({
+        message: "Unauthorized user",
+      });
+    }
+
+    await contentDoc.populate("notes");
+    const contentNotes = contentDoc.notes;
+    console.log("Sent Notes : ", contentNotes);
+    return res.status(200).json(contentNotes);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: "Failed to fetch content notes",
+    });
+  }
+};
+
+// POST: Create New Note;
+const createNote = async (req, res) => {
+  try {
+    const { title, noteContent, userId, skillId, moduleId, submoduleId, contentId } = req.body;
+
+    if (userId.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Unauthorized user" });
+    }
+
+    // 1. Create the new Note document
+    const newNoteDoc = await Note.create({
+      title,
+      content: noteContent,
+      userId,
+      skillId,
+      moduleId,
+      submoduleId,
+    });
+
+    console.log("New Note Created : ", newNoteDoc);
+
+    // 2. Find the Content document and push the new note's ID to its notes array
+    const updatedContentDoc = await Content.findByIdAndUpdate(
+      contentId,
+      { $push: { notes: newNoteDoc._id } },
+      { new: true } // This returns the updated document
+    );
+
+    if (!updatedContentDoc) {
+      console.error("Content document not found. Note created but not linked.");
+      // Optional: Handle this case by deleting the new note to prevent orphans
+      await Note.findByIdAndDelete(newNoteDoc._id);
+      return res.status(404).json({ message: "Content not found, note creation failed." });
+    }
+
+    return res.status(201).json(newNoteDoc);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to create new note" });
+  }
+};
+
+// PUT : UPDATE A NOTE.
+const updateNote = async (req, res) => {
+  try {
+    const { noteId } = req.params;
+    const { title, content } = req.body;
+
+    // Optional: Check if the user is authorized to update this note
+    const note = await Note.findById(noteId);
+    if (!note) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+    if (note.userId.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Unauthorized user" });
+    }
+
+    const updatedNote = await Note.findByIdAndUpdate(
+      noteId,
+      { title, content },
+      { new: true, runValidators: true } // `new: true` returns the updated document
+    );
+
+    return res.status(200).json(updatedNote);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to update note" });
+  }
+};
+
+// DELETE: Delete a Note: 
+const deleteNote = async (req, res) => {
+  try {
+    const { noteId } = req.params;
+
+    // Find the note to get its contentId for cleanup
+    const noteToDelete = await Note.findById(noteId);
+    if (!noteToDelete) {
+      return res.status(404).json({ message: "Note not found" });
+    }
+
+    if (noteToDelete.userId.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Unauthorized user" });
+    }
+
+    // Remove the note's ID from the corresponding Content document
+    await Content.findByIdAndUpdate(noteToDelete.submoduleId, {
+      $pull: { notes: noteId },
+    });
+
+    // Delete the note itself
+    await Note.findByIdAndDelete(noteId);
+
+    return res.status(200).json({ message: "Note deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to delete note" });
+  }
+};
+
+module.exports = {
+  generateArticles,
+  generateVideos,
+  getContentArticles,
+  getContentVideos,
+  createNote,
+  getContentNotes, 
+  updateNote,
+  deleteNote
+};

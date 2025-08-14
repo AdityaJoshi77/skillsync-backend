@@ -20,7 +20,7 @@ const generateRoadmap_gemini = async (req, res) => {
 
     console.log("📥 Received title:", title);
     console.log("🚀 Calling geminiGenerateRoadmapDummy...");
-    const modules = await geminiGenerateRoadmapDummy(title);
+    const modules = await geminiGenerateRoadmap(title);
     // const modules = dummyRoadmap;
 
     // if modules generation somehow fails (parsing issue, etc)

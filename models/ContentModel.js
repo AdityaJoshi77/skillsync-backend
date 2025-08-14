@@ -6,7 +6,10 @@ const noteSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     content: { type: String, default: "" },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    skillId: { type: mongoose.Schema.Types.ObjectId, ref: "Skill", required: true },
+    moduleId: { type: mongoose.Schema.Types.ObjectId, ref: "Module", required: true },
+    submoduleId: { type: mongoose.Schema.Types.ObjectId, ref: "Submodule", required: true },
   },
   { timestamps: true }
 );

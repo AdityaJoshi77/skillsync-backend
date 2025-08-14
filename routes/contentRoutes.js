@@ -7,11 +7,22 @@ const {
   generateVideos,
   getContentArticles,
   getContentVideos,
+  getContentNotes,
+  createNote,
+  updateNote,
+  deleteNote,
 } = require("../controllers/contentController");
 
-router.post("/generatearticles", protect, generateArticles);
-router.post("/generatevideos", protect, generateVideos);
-router.get("/getpersistedarticles/:contentId", protect, getContentArticles);
-router.get("/getpersistedvideos/:contentId", protect, getContentVideos);
+router.post("/generateArticles", protect, generateArticles);
+router.post("/generateVideos", protect, generateVideos);
+router.post("/createNote", protect, createNote);
+
+router.get("/getPersistedArticles/:contentId", protect, getContentArticles);
+router.get("/getPersistedVideos/:contentId", protect, getContentVideos);
+router.get("/getPersistedNotes/:contentId", protect, getContentNotes);
+
+router.put("/updateNote/:noteId", protect, updateNote);
+
+router.delete("/deleteNote/:noteId", protect, deleteNote);
 
 module.exports = router;
