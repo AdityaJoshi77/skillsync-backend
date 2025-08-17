@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes.js');
 const skillRoutes = require('./routes/skillRoutes.js')
 const roadmapRoutes = require('./routes/roadmapRoutes.js')
 const contentRoutes = require('./routes/contentRoutes.js')
+const notesRoutes = require('./routes/notesRoutes.js')
 
 dotenv.config();
 const app = express();
@@ -25,6 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/skill', skillRoutes);
 app.use('/api/roadmap', roadmapRoutes);
 app.use('/api/content', contentRoutes);
+app.use('/api/notes',notesRoutes)
 
 // Routes placeholder
 app.get('/', (req,res) => {

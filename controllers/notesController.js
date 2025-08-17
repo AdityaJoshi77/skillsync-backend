@@ -1,6 +1,62 @@
+const { Note, Content } = require("../models/ContentModel");
+const Skill = require("../models/SkillModel");
 
-const {Note, Content} = require('../models/ContentModel');
+// GET: USER'S NOTES
+const getUserNotes = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    console.log('Inside getUserNotes');
+    // fetch notes for this user
+    const userNotes = await Note.find({ userId });
 
+    // fetch all skills for this user in one go (avoid N queries)
+    const skills = await Skill.find({ userId });
+
+    // transform notes into desired shape
+    const notesWithNames = userNotes.map((note) => {
+      // find matching skill
+      const skillDoc = skills.find(
+        (skill) => skill._id.toString() === note.skillId.toString()
+      );
+      if (!skillDoc) return null;
+
+      // find module
+      const moduleDoc = skillDoc.modules.id(note.moduleId);
+      if (!moduleDoc) return null;
+
+      // find submodule
+      const submoduleDoc = moduleDoc.submodules.id(note.submoduleId);
+      if (!submoduleDoc) return null;
+
+      return {
+        _id: note._id.toString(),
+        contentId: submoduleDoc.contentId
+          ? submoduleDoc.contentId.toString()
+          : null,
+        title: note.title,
+        content: note.content,
+        createdAt: note.createdAt,
+
+        userId: note.userId.toString(),
+        skillId: note.skillId.toString(),
+        moduleId: note.moduleId.toString(),
+        submoduleId: note.submoduleId.toString(),
+
+        skillName: skillDoc.title,
+        moduleName: moduleDoc.title,
+        submoduleName: submoduleDoc.title,
+      };
+    });
+
+    console.log('User Notes : ', notesWithNames);
+
+    // filter out nulls in case of broken refs
+    return res.json(notesWithNames.filter(Boolean));
+  } catch (error) {
+    console.error("Could not get user's notes", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 // PUT : UPDATE A NOTE.
 const updateNote = async (req, res) => {
@@ -30,7 +86,7 @@ const updateNote = async (req, res) => {
   }
 };
 
-// DELETE: Delete a Note: 
+// DELETE: Delete a Note:
 const deleteNote = async (req, res) => {
   try {
     const { noteId } = req.params;
@@ -59,3 +115,5 @@ const deleteNote = async (req, res) => {
     return res.status(500).json({ message: "Failed to delete note" });
   }
 };
+
+module.exports = {getUserNotes, deleteNote, updateNote};
