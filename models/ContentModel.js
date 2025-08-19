@@ -32,6 +32,20 @@ const articleSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
 
+// NEW ARTICLE SCHEMA : (TO BE IMPLEMENTED....)
+/**
+ * const articleSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  link: { type: String[], required: true },
+  summary: { type: String, default: "" },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+});
+
+Instead of array of objects having links for the articles and their individual summary, 
+we will now have a single article summary and an array of links of web articles which 
+the user can refer for future use.
+ */
+
 // Content schema
 const contentSchema = new mongoose.Schema({
   youtubeLinks: {
@@ -44,6 +58,14 @@ const contentSchema = new mongoose.Schema({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: "Article" }],
     default: [],
   },
+
+  // New Article Field:
+  /**
+   * article:{
+   *  type: mongoose.Schema.Types.ObjectId,
+   *  ref: "Article"
+   * }
+   */
 
   // Array of references to Note documents
   notes: {

@@ -10,49 +10,50 @@ const geminiGenerateRoadmap = async (skillName) => {
   });
 
   const generationPrompt = `
-You are a tech expert AI that helps generate structured roadmaps for learning skills.
+You are a career mentor AI that generates structured learning roadmaps.  
 
-We want you to break down a tech skill (e.g., "Learn React") into a sequence of modules. Each module represents a major milestone or concept, and contains several submodules that are atomic tasks.
+We want you to break down a skill (either technical or professional career skill) into a sequence of modules.  
+Each module represents a major milestone or concept, and contains several submodules that are atomic tasks.  
 
-Here is the schema structure you should follow:
+Schema:  
+Skill:  
+- title: name of the overall skill  
+- modules: list of Module objects  
 
-Skill:
-title: name of the overall skill
-modules: list of Module objects
+Module:  
+- title: name of the module (e.g., "Learn CSS" or "Overcoming Stage Fear")  
+- status: default to "Pending"  
+- submodules: list of Submodule objects  
 
-Module:
-title: name of the module (e.g., "Learn CSS")
-status: default to "Pending"
-submodules: list of Submodule objects
+Task:  
+- title: a single task or concept (e.g., "Understand Flexbox" or "Practice Eye Contact")  
+- type: must be one of ["Learning", "Practice", "Project"]  
+- status: default to "Pending"  
 
-Task:
-title: a single task or concept (e.g., "Understand Flexbox")
-type: must be one of ["Learning", "Practice", "Project"]
-status: default to "Pending"
+Guidelines:  
+- Break down the skill "${skillName}".  
+- Include as many modules as needed to cover the skill thoroughly.  
+- Each module should have 3–5 tasks.  
+- Tasks must be concrete, specific activities or concepts.  
+- Use the same schema regardless of whether the skill is **technical** (like "React") or **career-oriented** (like "Public Speaking", "Content Writing", "Digital Marketing").  
+- Do NOT generate for hobbies or personal interests (e.g., baking, gardening, cooking).  
 
-Guidelines:
-Break down the skill "${skillName}".
-Generate as many modules as needed to cover the skill thoroughly.
-Each module should have 3–5 tasks.
-Tasks must be concrete, specific activities or concepts.
-Use only the three types mentioned above.
+Only return the modules array in valid JSON format — no preamble, no markdown.  
 
-Only return the modules array in valid JSON format — no preamble, no markdown.
-
-Example Output:
-[
-  {
-    "title": "Module Title",
-    "status": "Pending",
-    "submodules": [
-      {
-        "title": "Task Title",
-        "type": "Learning",
-        "status": "Pending"
-      }
-    ]
-  }
-]
+Example Output:  
+[  
+  {  
+    "title": "Module Title",  
+    "status": "Pending",  
+    "submodules": [  
+      {  
+        "title": "Task Title",  
+        "type": "Learning",  
+        "status": "Pending"  
+      }  
+    ]  
+  }  
+]  
 `;
 
   try {
@@ -79,51 +80,36 @@ const geminiGenerateRoadmapDummy = async (skillName) => {
   });
 
   const generationPrompt = `
-You are a tech expert AI that helps generate structured roadmaps for learning skills.
+You are a career mentor AI that generates structured learning roadmaps.  
 
-We want you to break down a tech skill (e.g., "Learn React") into a sequence of modules. Each module represents a major milestone or concept, and contains several submodules that are atomic tasks.
+We want you to break down a skill (either technical or professional career skill) into a sequence of modules.  
+Each module represents a major milestone or concept, and contains several submodules that are atomic tasks.  
 
-Here is the schema structure you should follow:
+Schema:  
+Skill:  
+- title: name of the overall skill  
+- modules: list of Module objects  
 
-Skill:
-title: name of the overall skill
-modules: list of Module objects
+Module:  
+- title: name of the module  
+- status: "Pending"  
+- submodules: list of Submodule objects  
 
-Module:
-title: name of the module (e.g., "Learn CSS")
-status: default to "Pending"
-submodules: list of Submodule objects
+Task:  
+- title: a single task or concept  
+- type: must be one of ["Learning", "Practice", "Project"]  
+- status: either "Pending" or "Completed"  
 
-Task:
-title: a single task or concept (e.g., "Understand Flexbox")
-type: must be one of ["Learning", "Practice", "Project"]
-status: either "Pending" or "Completed"
+Guidelines:  
+- Break down the skill "${skillName}".  
+- Include as many modules as needed.  
+- Each module should have 3–5 tasks.  
+- Tasks must be concrete, specific activities or concepts.  
+- Mark the status of some (but not all) submodules as "Completed".  
+- Accept both **technical skills** (e.g., React, Data Structures) and **career skills** (e.g., Public Speaking, Digital Marketing).  
+- Do NOT generate for hobbies (baking, gardening, cooking, etc.).  
 
-Guidelines:
-Break down the skill "${skillName}".
-Generate as many modules as needed to cover the skill thoroughly.
-Each module should have 3–5 tasks.
-Tasks must be concrete, specific activities or concepts.
-IMPORTANT: Since the project is in testing phase, mark the status of some (but not all) submodules across various modules as "Completed".
-Use only the two statuses exactly as "Pending" or "Completed" (case-sensitive).
-Use only the three types mentioned above.
-
-Only return the modules array in valid JSON format — no preamble, no markdown.
-
-Example Output:
-[
-  {
-    "title": "Module Title",
-    "status": "Pending",
-    "submodules": [
-      {
-        "title": "Task Title",
-        "type": "Learning",
-        "status": "Completed"
-      }
-    ]
-  }
-]
+Only return the modules array in valid JSON format — no preamble, no markdown.  
 `;
 
   try {

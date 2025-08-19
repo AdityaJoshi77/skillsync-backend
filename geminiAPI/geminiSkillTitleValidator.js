@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { GoogleGenerativeAI } = require("@google/generative-ai"); 
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const geminiValidateSkillTitle = async (title) => {
@@ -9,20 +9,24 @@ const geminiValidateSkillTitle = async (title) => {
   });
 
   const prompt = `
-You are an AI assistant helping validate user-submitted skill titles.
+You are an AI assistant helping validate user-submitted skill titles.  
 
-Given a title: "${title}", decide if this is a VALID tech-related skill suitable for generating a learning roadmap.
+Given a title: "${title}", decide if this is a VALID career-related skill suitable for generating a learning roadmap.  
 
-Rules:
-- It must be clearly related to technology, programming, or development (e.g., "React.js", "Linux Basics", "Data Structures").
-- It must not be gibberish or vague (e.g., "asdf", "do it", "fast stuff").
-- It should be something people actually learn or work on in the tech/software industry.
+Rules:  
+- VALID skills include **technology, programming, development, or professional/career skills**.  
+  Examples: "React.js", "Linux Basics", "Data Structures", "Public Speaking", "Digital Marketing", "Content Writing".  
+- INVALID if:  
+  - It is a **hobby/personal interest** (e.g., "baking", "gardening", "cooking", "painting").  
+  - It is **gibberish or vague** (e.g., "asdf", "do it", "fast stuff").  
+  - It is unrelated to **professional growth or career development**.  
 
-Respond ONLY with:
-- VALID
-- INVALID
+Respond ONLY with:  
+- VALID  
+- INVALID  
 
-No explanation or extra characters.`;
+No explanation or extra characters.
+`;
 
   try {
     const result = await model.generateContent(prompt);
